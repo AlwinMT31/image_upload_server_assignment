@@ -1,0 +1,39 @@
+services:
+  # ── Backend instance 1 ────────────────────────────────────────────────────
+  app1:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: upload_server_1
+    env_file: .env
+    environment:
+      PORT: 3001
+    ports:
+      - "3001:3001"
+    restart: unless-stopped
+
+  # ── Backend instance 2 ────────────────────────────────────────────────────
+  app2:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: upload_server_2
+    env_file: .env
+    environment:
+      PORT: 3002
+    ports:
+      - "3002:3002"
+    restart: unless-stopped
+
+  # ── NGINX load balancer ───────────────────────────────────────────────────
+  nginx:
+    image: nginx:alpine
+    container_name: nginx_lb
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - app1
+      - app2
+    restart: unless-stopped
